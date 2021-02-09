@@ -1,16 +1,30 @@
 import 'dotenv/config';
 import { User } from './schemas/User';
 import { config, createSchema } from '@keystone-next/keystone/schema';
+import { withItemData, statelessSessions } from '@keystone-next/keystone/session';
+import { createAuth } from '@keystone-next/auth';
 
 const databaseURL =
   process.env.DATABASE_URL || 'mongodb://localhost/keystone-sickfits-tutorial';
 
 const sessionConfig = {
   maxAge: 60 * 60 * 24 * 360, // How long should user stay signed in
-  secret: process.env.COOKIE_SECRET,
+  secret: process.env.COOKIE_SECRET || 'secret',
 };
 
-export default config({
+const { withAuth } = createAuth(
+  {
+    listKey: 'User',
+    identityField: 'email',
+    secretField: 'password',
+    initFirstItem: {
+      fields: ['name', 'email', 'password'],
+      //TODO Add initial roles
+    }
+  }
+);
+
+export default withAuth(config({
   server: {
     cors: {
       origin: [process.env.FRONTEND_URL],
@@ -27,8 +41,13 @@ export default config({
     User
   }),
   ui: {
-    // Change this for roles
-    isAccessAllowed: () => true,
+    // Change this for roles // Show the UI only for people who pass this test
+    isAccessAllowed: ({ session }) => {
+      return session?.data;
+    },
   },
-  // Add Session values here
-});
+  session: withItemData(statelessSessions(sessionConfig), {
+    User: `id`
+  })
+}
+));
