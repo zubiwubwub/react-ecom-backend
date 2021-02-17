@@ -8,6 +8,7 @@ import { ProductImage } from './schemas/ProductImage';
 import { withItemData, statelessSessions } from '@keystone-next/keystone/session';
 import { insertSeedData } from './seed-data';
 import { sendPasswirdResetEmail } from './lib/mail';
+import { extendGraphqlSchema } from './mutations';
 
 const databaseURL =
   process.env.DATABASE_URL || 'mongodb://localhost/keystone-sickfits-tutorial';
@@ -59,6 +60,7 @@ export default withAuth(config({
     ProductImage,
     CartItem,
   }),
+  extendGraphqlSchema,
   ui: {
     // Change this for roles // Show the UI only for people who pass this test
     isAccessAllowed: ({ session }) => {
