@@ -14,8 +14,8 @@ export const User = list({
       ui: {
         createView: { fieldMode: 'hidden'},
         itemView: { fieldMode: 'read' },
-      }
-    })
-    // TODO roles, cast, orders
+      },
+    }),
+    orders: relationship({ ref: 'Order.user', many: true }),
   },
 });
